@@ -1,0 +1,14 @@
+INFO:     Started server process [1]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+Database already seeded, skipping.
+[LLM] Initialized groq / llama-3.3-70b-versatile
+[DEBUG] Raw SQL generation from Groq:
+Question: list all products
+SQLQuery: SELECT "id", "name", "category", "price" FROM products LIMIT 5;
+---
+[DEBUG] Extracted SQL:
+SELECT "id", "name", "category", "price" FROM products LIMIT 5;
+---
+INFO:     172.18.0.1:59688 - "POST /query HTTP/1.1" 200 OK
