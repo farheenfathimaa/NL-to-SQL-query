@@ -41,8 +41,5 @@ postgres_data/
 .DS_Store
 Thumbs.db
 
-# screenshots
-screenshots
-
 # logs
 backend_logs.txt
