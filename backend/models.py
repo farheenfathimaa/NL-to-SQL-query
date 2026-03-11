@@ -11,14 +11,14 @@ Base = declarative_base()
 class Region(Base):
     __tablename__ = 'regions'
     id = Column(Integer, primary_key=True)
-    name = Column(String, unique=True, nullable=False)
+    region_name = Column(String, unique=True, nullable=False)
     sales_reps = relationship("SalesRep", back_populates="region")
 
 
 class SalesRep(Base):
     __tablename__ = 'sales_reps'
     id = Column(Integer, primary_key=True)
-    name = Column(String, nullable=False)
+    rep_name = Column(String, nullable=False)
     region_id = Column(Integer, ForeignKey('regions.id'))
     region = relationship("Region", back_populates="sales_reps")
     orders = relationship("Order", back_populates="sales_rep")
@@ -27,7 +27,7 @@ class SalesRep(Base):
 class Product(Base):
     __tablename__ = 'products'
     id = Column(Integer, primary_key=True)
-    name = Column(String, nullable=False)
+    product_name = Column(String, nullable=False)
     category = Column(String)
     price = Column(Float, nullable=False)
     order_items = relationship("OrderItem", back_populates="product")
@@ -74,7 +74,8 @@ def init_db():
             print(f"Waiting for database... (attempt {i + 1}/{max_retries})")
             time.sleep(5)
 
-    # Create tables if they don't already exist (safe, idempotent — no drop_all)
+    # Recreate tables to apply the new schema (we drop all to rename columns)
+    Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
 
     Session = sessionmaker(bind=engine)
@@ -89,27 +90,27 @@ def init_db():
         print("Seeding database with sample data...")
 
         # Regions
-        regions = [Region(name=n) for n in ["North", "South", "East", "West"]]
+        regions = [Region(region_name=n) for n in ["North", "South", "East", "West"]]
         session.add_all(regions)
         session.commit()
 
         # Sales reps
         reps = [
-            SalesRep(name="Alice", region_id=regions[0].id),
-            SalesRep(name="Bob", region_id=regions[1].id),
-            SalesRep(name="Charlie", region_id=regions[2].id),
-            SalesRep(name="David", region_id=regions[3].id),
+            SalesRep(rep_name="Alice", region_id=regions[0].id),
+            SalesRep(rep_name="Bob", region_id=regions[1].id),
+            SalesRep(rep_name="Charlie", region_id=regions[2].id),
+            SalesRep(rep_name="David", region_id=regions[3].id),
         ]
         session.add_all(reps)
         session.commit()
 
         # Products
         products = [
-            Product(name="Laptop", category="Electronics", price=1200.0),
-            Product(name="Phone", category="Electronics", price=800.0),
-            Product(name="Monitor", category="Electronics", price=300.0),
-            Product(name="Desk Chair", category="Furniture", price=150.0),
-            Product(name="Coffee Mug", category="Kitchen", price=15.0),
+            Product(product_name="Laptop", category="Electronics", price=1200.0),
+            Product(product_name="Phone", category="Electronics", price=800.0),
+            Product(product_name="Monitor", category="Electronics", price=300.0),
+            Product(product_name="Desk Chair", category="Furniture", price=150.0),
+            Product(product_name="Coffee Mug", category="Kitchen", price=15.0),
         ]
         session.add_all(products)
         session.commit()

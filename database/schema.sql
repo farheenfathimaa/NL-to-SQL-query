@@ -2,18 +2,18 @@
 
 CREATE TABLE regions (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(255) UNIQUE NOT NULL
+    region_name VARCHAR(255) UNIQUE NOT NULL
 );
 
 CREATE TABLE sales_reps (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
+    rep_name VARCHAR(255) NOT NULL,
     region_id INTEGER REFERENCES regions(id)
 );
 
 CREATE TABLE products (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
+    product_name VARCHAR(255) NOT NULL,
     category VARCHAR(255),
     price FLOAT NOT NULL
 );

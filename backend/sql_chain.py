@@ -141,7 +141,30 @@ def run_query(question: str):
 
     # --- Step 1: Generate SQL ---
     def make_sql_chain(provider, model):
-        return create_sql_query_chain(get_llm(provider, model), db)
+        from langchain_core.prompts import PromptTemplate
+        
+        # We need a custom prompt because tables share column names (like 'id' and 'name')
+        # which causes psycopg2.errors.AmbiguousColumn if not fully qualified.
+        custom_prompt = PromptTemplate.from_template(
+            """Given an input question, first create a syntactically correct {dialect} query to run, then look at the results of the query and return the answer.
+Unless the user specifies a specific number of examples they wish to obtain, always limit your query to at most {top_k} results.
+You can order the results by a relevant column to return the most interesting examples in the database.
+Never query for all the columns from a specific table, only ask for the relevant columns given the question.
+You MUST double quote all column names and table names.
+CRITICAL: You MUST use fully-qualified column names (e.g., "table_name"."column_name") in your SELECT, WHERE, GROUP BY, and ORDER BY clauses to prevent ambiguous column errors.
+
+Pay attention to use only the column names that you can see in the schema description. Be careful to not query for columns that do not exist. Also, pay attention to which column is in which table.
+
+Only use the following tables:
+{table_info}
+
+Question: {input}"""
+        )
+        return create_sql_query_chain(
+            get_llm(provider, model), 
+            db, 
+            prompt=custom_prompt
+        )
 
     generated_query = _invoke_with_fallback(make_sql_chain, {"question": question})
     print(f"[DEBUG] Raw SQL generation from Groq:\n{generated_query}\n---", flush=True)
